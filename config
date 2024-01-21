@@ -1,0 +1,10 @@
+name=aleksei
+subject=chemistry
+nnet=gpt
+sampler=strict
+dataset=./data/dataset.xlsx
+data_format=table
+classes=Cube,Stick,Sphere,Flat,Amorphous
+n_for_train=5
+test_size=0.3
+seed=36
