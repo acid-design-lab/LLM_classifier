@@ -1,4 +1,7 @@
-from abc import ABC, abstractmethod
+from __future__ import annotations
+
+from abc import ABC
+from abc import abstractmethod
 
 
 class Sampler(ABC):
@@ -11,8 +14,3 @@ class Sampler(ABC):
     @abstractmethod
     def sample(self, train: list[str], test: list[str]) -> list:
         pass
-
-
-
-
-
