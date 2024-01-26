@@ -13,8 +13,8 @@ from samplers.strict_sampler import StrictSampler
 
 
 load_dotenv()
-# argv[1]
-with open(r"./config", "r", encoding="utf-8") as file:
+path = argv[1]
+with open(path, "r", encoding="utf-8") as file:
     data_file = file.read()
     config = parse(data_file)
 
@@ -49,6 +49,7 @@ for request in range(len(sample_features_test)):
         completion_response = request_completion(question=sample_features_test[request],
                                                  name=f"{config['subject']}_doctor",
                                                  request=template,
+                                                 engine=config["engine"],
                                                  )
         print(completion_response.choices[0].message.content)
 

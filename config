@@ -1,9 +1,10 @@
 name=aleksei
 subject=chemistry
 nnet=gpt
-sampler=strict
-dataset=./data/dataset.xlsx
-data_format=table
+engine=gpt-4
+sampler=occurrence
+dataset=data/text_dataset_random_patterns.csv
+data_format=text
 classes=Cube,Stick,Sphere,Flat,Amorphous
 n_for_train=5
 test_size=0.3

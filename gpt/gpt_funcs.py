@@ -40,8 +40,15 @@ def create_request_template(data: list[(str, str)],
     return request
 
 
-def request_completion(question: str, name: str, request: list[dict[str, str]]) -> ChatCompletion:
+def request_completion(question: str,
+                       name: str,
+                       request: list[dict[str, str]],
+                       engine: str) -> ChatCompletion:
     API_URL = os.environ.get("API_URL", "http://localhost:8000")
     return ChatCompletion.model_validate(
         requests.get(API_URL + "/respond",
-                     data=json.dumps({"question": question, "name": name, "request": request})).json())
+                     data=json.dumps({"question": question,
+                                      "name": name,
+                                      "request": request,
+                                      "engine": engine,
+                                      })).json())
