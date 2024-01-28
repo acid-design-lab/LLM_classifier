@@ -37,7 +37,7 @@ for smp in Sampler.__subclasses__():
         sampler = smp()
         sampler.configure(config)
 
-for request in range(10): #len(sample_features_test)
+for request in range(len(sample_features_test)):
 
     sampler.configure({"class": sample_targets_test[request].split(", ")[0]})
     samples = sampler.sample(list(zip(sample_features_train, sample_targets_train)),
