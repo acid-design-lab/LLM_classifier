@@ -1,11 +1,11 @@
 name=aleksei
 subject=chemistry
-nnet=gpt
-engine=gpt-4
+nnet=mistral
+engine=mistral-medium
 sampler=occurrence
 dataset=data/text_dataset_random_patterns.csv
 data_format=text
 classes=Cube,Stick,Sphere,Flat,Amorphous
-n_for_train=5
+n_for_train=2
 test_size=0.3
 seed=36
