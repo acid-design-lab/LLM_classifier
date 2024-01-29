@@ -1,4 +1,7 @@
-from abc import ABC, abstractmethod
+from __future__ import annotations
+
+from abc import ABC
+from abc import abstractmethod
 
 
 class TrainTestSplitter(ABC):
@@ -9,5 +12,3 @@ class TrainTestSplitter(ABC):
     @abstractmethod
     def apply(self):
         pass
-
-
