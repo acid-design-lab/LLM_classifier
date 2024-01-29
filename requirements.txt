@@ -1,8 +1,7 @@
-openai~=1.8.0
-pandas~=2.1.4
-scikit-learn~=1.4.0
-requests~=2.31.0
-python-dotenv
-openpyxl
 mistralai
-
+openai~=1.8.0
+openpyxl
+pandas~=2.1.4
+python-dotenv
+requests~=2.31.0
+scikit-learn~=1.4.0

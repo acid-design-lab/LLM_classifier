@@ -1,8 +1,9 @@
-from mistralai.client import MistralClient
-from mistralai.models.chat_completion import ChatMessage
+from __future__ import annotations
+
 import os
-from gpt.templates import zero_shot_template
 import random
+
+from gpt.templates import zero_shot_template
 
 api_key = os.environ["MISTRAL_API_KEY"]
 model = "mistral-medium"
@@ -27,8 +28,10 @@ model = "mistral-medium"
 # print(chat_response.choices[0].message.content)
 
 
-def create_request_template_mistral(data: list[(str, str)],
-                                    seed: int, ) -> list:
+def create_request_template_mistral(
+    data: list[(str, str)],
+    seed: int,
+) -> list:
     """This func generates request template for selected model to classify text using few-shots method."""
 
     # request = [ChatMessage(role="user", content=zero_shot_template["chemistry"])]
