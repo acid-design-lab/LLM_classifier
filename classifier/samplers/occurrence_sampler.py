@@ -20,9 +20,7 @@ class OccurrenceSampler(Sampler):
         self.__max_length = config.get("n_for_train", self.__max_length)
 
     def sample(
-        self,
-        train: list[DatasetEntry],
-        test: list[DatasetEntry],
+        self, train: list[DatasetEntry], test: list[DatasetEntry]
     ) -> list[DatasetEntry]:
 
         train = copy.deepcopy(train)

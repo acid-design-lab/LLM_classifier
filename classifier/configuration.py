@@ -28,7 +28,7 @@ class Configuration(dict[str, str | int | bool | Path]):
 
     @classmethod
     @no_type_check
-    def load(cls, path: Path) -> Configuration:
+    def load(cls, path: Path) -> Self:
         if not isinstance(path, Path):
             raise ValueError(f"Invalid argument: {path}")
         if not path.is_file():

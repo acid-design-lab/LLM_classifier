@@ -53,18 +53,29 @@ class Dataset(list[DatasetEntry]):
         config: Configuration,
         delimiter: str = ",",
     ) -> Dataset:
+
         data: pd.DataFrame = pd.read_csv(cls._get_io(into_io), delimiter=delimiter)
         return cls._process_entries(data, config)
 
     @classmethod
-    def from_xlsx(cls, path: Path | BinaryIO, config: Configuration) -> Dataset:
+    def from_xlsx(
+        cls,
+        path: Path | BinaryIO,
+        config: Configuration,
+    ) -> Dataset:
+
         if not isinstance(path, Path):
             raise TypeError("Invalid data passed.")
         data: pd.DataFrame = pd.read_excel(path)
         return cls._process_entries(data, config)
 
     @classmethod
-    def load_path(cls, path: Path, config: dict | Configuration) -> Dataset:
+    def load_path(
+        cls,
+        path: Path,
+        config: dict | Configuration,
+    ) -> Dataset:
+
         if isinstance(config, dict) and not isinstance(config, Configuration):
             config = Configuration(existing_data=config)
         if not isinstance(path, Path):
@@ -79,7 +90,12 @@ class Dataset(list[DatasetEntry]):
             raise ValueError(f"Invalid file format: {path.suffix}")
 
     @classmethod
-    def _process_entries(cls, _data: pd.DataFrame, config: Configuration) -> Dataset:
+    def _process_entries(
+        cls,
+        _data: pd.DataFrame,
+        config: Configuration,
+    ) -> Dataset:
+
         classes_labels: list[str] = config.classes
         (texts, classes) = _data.drop(classes_labels, axis=1), _data[classes_labels]
         labels: list[str] = list(_data.drop(classes_labels, axis=1).columns)
@@ -116,7 +132,11 @@ class Dataset(list[DatasetEntry]):
         )
         return cls(items)
 
-    def train_test_split(self, test_size) -> tuple[Dataset, Dataset]:
+    def train_test_split(
+        self,
+        test_size,
+    ) -> tuple[Dataset, Dataset]:
+
         train, test = train_test_split(self, test_size=test_size)
         return Dataset(train), Dataset(test)
 

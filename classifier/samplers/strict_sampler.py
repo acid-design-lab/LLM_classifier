@@ -20,7 +20,9 @@ class StrictSampler(Sampler):
         self.__seed = config.get("seed", self.__seed)
 
     def sample(
-        self, train: list[DatasetEntry], test: list[DatasetEntry]
+        self,
+        train: list[DatasetEntry],
+        test: list[DatasetEntry],
     ) -> list[DatasetEntry]:
 
         items = []

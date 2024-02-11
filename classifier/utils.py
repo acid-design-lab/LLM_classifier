@@ -4,7 +4,6 @@ from pathlib import Path
 
 
 def create_result_directory(config: dict) -> Path:
-    """This func creates a directory in which your experiments results will be located."""
 
     experiments_directory = Path("./experiments")
     (experiments_directory / config["name"]).mkdir(parents=True, exist_ok=True)

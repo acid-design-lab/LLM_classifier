@@ -12,7 +12,6 @@ from dotenv import load_dotenv
 from .configuration import Configuration
 from .configuration import ConfigurationError
 from .dataset import Dataset
-from .invoke import Result
 from .logger import logger
 from .providers import CompletionProvider
 from .providers import CompletionRequest
@@ -25,18 +24,15 @@ from classifier.samplers.strict_sampler import StrictSampler
 
 load_dotenv()
 
-# ---------------------------------------- 1. Load data
 config_path = argv[1]
 config = Configuration.load(Path(config_path))
 random.seed(int(config.seed))
 dataset = Dataset.load_path(config.dataset, config)
 splits: tuple[Dataset, Dataset] = dataset.train_test_split(test_size=config.test_size)
 train_dataset, test_dataset = splits
-test_dataset = test_dataset[:3]
-# ----------------------------------------- endof 1
+# test_dataset = test_dataset[:3]  # To delete when you gonna use it!!!!!!
 
-# ----------------------------------------- 2. init global state
-results: list[Result] = []
+results: list[dict] = []
 path = create_result_directory(config=config)
 total_cost: float = 0
 
@@ -52,9 +48,6 @@ for smp in [
 if sampler is None:
     logger.error("No sampler specified.")
     raise ConfigurationError("sampler")
-# ----------------------------------------- endof 2
-
-# ----------------------------------------- 3. Main loop
 
 for dry_run in [True, False]:
     for item in tqdm.tqdm(test_dataset):
@@ -86,10 +79,9 @@ for dry_run in [True, False]:
                     f"Successfully retrieved completion. Classes: {completion.classes}"
                 )
             logger.debug(f"Approximate cost of request is {completion.cost:.02f}$")
-            # noinspection PyArgumentList
             if not dry_run:
                 results.append(
-                    Result(
+                    dict(
                         input=item.input_text,
                         target_classes=item.classes,
                         predicted_classes=completion.classes,
@@ -107,20 +99,9 @@ for dry_run in [True, False]:
             exit(0)
         total_cost = 0
 
-# ----------------------------------------- endof 3
-
 with open(path / "results.json", "w") as file:
     json.dump(
-        list(
-            map(
-                lambda x: {
-                    "input": x.input,
-                    "target": x.target_classes,
-                    "predict": x.predicted_classes,
-                },
-                results,
-            )
-        ),
+        list(results),
         file,
     )
 

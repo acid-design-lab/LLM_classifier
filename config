@@ -1,7 +1,7 @@
 name=aleksei
 subject=chemistry
-provider=openai
-engine=gpt-4-turbo-preview
+provider=mistral
+engine=mistral-medium
 sampler=occurrence
 dataset=data/dataset.xlsx
 data_format=table
