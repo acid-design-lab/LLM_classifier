@@ -54,12 +54,13 @@ class MistralCompletionProvider(AbstractRemoteExecutionCompletionProvider):
     def _prompt_tokens_to_price(tokens: int, engine: str) -> float:
 
         match engine:
-            case "mistral-medium":
-                return 2.5 / 1.08 / 1_000_000 * tokens
-            case "mistral-small":
-                return 0.6 / 1.08 / 1_000_000 * tokens
-            case "mistral-tiny":
-                return 0.14 / 1.08 / 1_000_000 * tokens
+            case "mistral-medium-latest":
+                return 2.7 / 1_000_000 * tokens
+            case "mistral-small-latest":
+                return 2 / 1_000_000 * tokens
+            case "mistral-large-latest":
+                return 8 / 1_000_000 * tokens
+
             case _:
                 raise ValueError("Invalid engine!")
 
@@ -67,12 +68,12 @@ class MistralCompletionProvider(AbstractRemoteExecutionCompletionProvider):
     def _completion_tokens_to_price(tokens: int, engine: str) -> float:
 
         match engine:
-            case "mistral-medium":
-                return 7.5 / 1.08 / 1_000_000 * tokens
-            case "mistral-small":
-                return 1.8 / 1.08 / 1_000_000 * tokens
-            case "mistral-tiny":
-                return 0.42 / 1.08 / 1_000_000 * tokens
+            case "mistral-medium-latest":
+                return 8.1 / 1_000_000 * tokens
+            case "mistral-small-latest":
+                return 6 / 1_000_000 * tokens
+            case "mistral-large-latest":
+                return 24 / 1_000_000 * tokens
             case _:
                 raise ValueError("Invalid engine!")
 
