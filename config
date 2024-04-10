@@ -1,0 +1,11 @@
+name=aleksei
+subject=chemistry
+provider=openai
+engine=gpt-3.5-turbo-1106
+sampler=occurrence
+dataset=data/yields_data_500.csv
+data_format=table
+classes=high_yielding,not_high_yielding
+n_for_train=5
+test_size=0.3
+seed=36
