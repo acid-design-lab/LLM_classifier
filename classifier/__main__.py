@@ -17,6 +17,7 @@ from .providers import CompletionProvider
 from .providers import CompletionRequest
 from .providers.mistral_provider import MistralCompletionProvider
 from .providers.openai_provider import OpenAICompletionProvider
+from .providers.anthropic_provider import AnthropicCompletionProvider
 from .utils import create_result_directory
 from classifier.samplers.occurrence_sampler import OccurrenceSampler
 from classifier.samplers.strict_sampler import StrictSampler
@@ -58,6 +59,8 @@ for dry_run in [True, False]:
             provider = OpenAICompletionProvider()
         elif config.provider == "mistral":
             provider = MistralCompletionProvider()
+        elif config.provider == "anthropic":
+            provider = AnthropicCompletionProvider()
 
         if provider is None:
             logger.error("No provider specified.")
