@@ -15,18 +15,26 @@ from classifier.templates import zero_shot_template
 
 class MistralCompletionProvider(AbstractRemoteExecutionCompletionProvider):
     __name: str
+    __template = None
 
     @property
     def provider(self):
         return "mistral"
 
     def configure(self, configuration: dict) -> None:
-
+        self.__template = configuration.get("subject", self.__template)
         AbstractRemoteExecutionCompletionProvider.configure(self, configuration)
 
     def _to_request_data(self, request: CompletionRequest) -> dict:
 
-        content = [{"role": "user", "content": zero_shot_template["chemistry"]}]
+        if self.__template is None:
+            raise ValueError("Enable to create request: template has not specified")
+        try:
+            content = [{"role": "user", "content": zero_shot_template[self.__template]}]
+        except KeyError:
+            raise ValueError(f"Enable to create request: \"template\" configuration parameter is invalid. Valid "
+                             f"options are: {', '.join(zero_shot_template.keys())}")
+
         for entry in request.samples:
             content.append({"role": "user", "content": entry.input_text})
             content.append({"role": "assistant", "content": entry.output_text})

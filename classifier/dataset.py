@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from io import StringIO
 from io import TextIOWrapper
 from pathlib import Path
-from typing import BinaryIO
+from typing import BinaryIO, Optional, Literal
 from typing import TypeGuard
 
 import pandas as pd
@@ -17,6 +17,7 @@ from classifier.configuration import Configuration
 class DatasetEntry:
     input_text: str
     output_text: str
+    split: Optional[Literal["train"] | Literal["test"]] = None
 
     @property
     def features(self) -> list[str]:
@@ -36,6 +37,11 @@ def only_strings(item: str | None) -> TypeGuard[str]:
 
 
 class Dataset(list[DatasetEntry]):
+
+    def __init__(self, *args, has_predefined_split=False, **kwargs):
+        self.has_predefined_split = has_predefined_split
+        super().__init__(*args, **kwargs)
+
     @staticmethod
     def _get_io(data: str | Path | TextIOWrapper):
         if isinstance(data, str):
@@ -96,13 +102,23 @@ class Dataset(list[DatasetEntry]):
         config: Configuration,
     ) -> Dataset:
 
+        has_predefined_split = False
+        if "split" in _data.columns:
+            has_predefined_split = True
+
         classes_labels: list[str] = config.classes
-        (texts, classes) = _data.drop(classes_labels, axis=1), _data[classes_labels]
-        labels: list[str] = list(_data.drop(classes_labels, axis=1).columns)
-        data: list[tuple[list[str], list[str]]] = list(
+        (texts, classes) = _data.drop(classes_labels + ["split"] if has_predefined_split else [], axis=1), \
+            _data[classes_labels]
+        splits = None
+        if has_predefined_split:
+            splits = _data["split"].tolist()
+        labels: list[str] = list(_data.drop(classes_labels + ["split"] if has_predefined_split else [], axis=1).columns)
+
+        data: list[tuple[list[str], list[str], Optional[list[str]]]] = list(
             zip(
                 map(lambda x: list(x[1:]), texts.itertuples()),
                 map(lambda x: list(x[1:]), classes.itertuples()),
+                *((splits,) if has_predefined_split else ())
             )
         )
         items = list(
@@ -126,18 +142,22 @@ class Dataset(list[DatasetEntry]):
                             )
                         )
                     ),
+                    split=entry[2] if has_predefined_split else None
                 ),
                 data,
             )
         )
-        return cls(items)
+        return cls(items, has_predefined_split=has_predefined_split)
 
     def train_test_split(
         self,
         test_size,
     ) -> tuple[Dataset, Dataset]:
-
-        train, test = train_test_split(self, test_size=test_size)
+        if self.has_predefined_split:
+            train = list(filter(lambda x: x.split == "train", self))
+            test = list(filter(lambda x: x.split == "test", self))
+        else:
+            train, test = train_test_split(self, test_size=test_size)
         return Dataset(train), Dataset(test)
 
     def tuples(self):

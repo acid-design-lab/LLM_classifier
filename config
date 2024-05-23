@@ -1,11 +1,12 @@
 name=aleksei
-subject=chemistry
+subject=nano_test
 provider=anthropic
 engine=claude-3-haiku-20240307
-sampler=occurrence
-dataset=data/yields_data_500.csv
+sampler=simple
+dataset=data/USPTO_R_clf.csv
 data_format=table
 classes=high_yielding,not_high_yielding
-n_for_train=5
+n_for_train=3
 test_size=0.3
 seed=36
+enable_metrics=True

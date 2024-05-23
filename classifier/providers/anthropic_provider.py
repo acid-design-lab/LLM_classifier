@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import base64
 import json
+from pathlib import Path
+from typing import Callable
 
+import magic
 import tiktoken
-
 
 from . import CompletionRequest
 from . import CompletionResponse
@@ -16,8 +19,13 @@ from classifier.templates import zero_shot_template
 
 from anthropic.types import Message
 
+
 class AnthropicCompletionProvider(AbstractRemoteExecutionCompletionProvider):
     __name: str
+    __template = None
+    __store_fn: Callable[[str], str] = None
+    __convert_fn: Callable[[str], str] = None
+    __vision: bool = False
 
     @property
     def provider(self):
@@ -25,13 +33,48 @@ class AnthropicCompletionProvider(AbstractRemoteExecutionCompletionProvider):
 
     def configure(self, configuration: dict) -> None:
         AbstractRemoteExecutionCompletionProvider.configure(self, configuration)
+        self.__template = configuration.get("subject", self.__template)
+        self.__convert_fn = configuration.get("convert_fn", self.__convert_fn)
+        self.__vision = configuration.get("vision", self.__vision)
         self.__name = str(configuration.get("name"))
         if self.__name is None:
             raise ConfigurationError("name")
 
     def _to_request_data(self, request: CompletionRequest) -> dict:
-        content = [{"role": "system", "content": zero_shot_template["chemistry"]}]
-
+        if self.__template is None:
+            raise ValueError("Enable to create request: template has not specified")
+        try:
+            content = [{"role": "system", "content": zero_shot_template[self.__template]}]
+        except KeyError:
+            raise ValueError(f"Enable to create request: \"template\" configuration parameter is invalid. Valid "
+                             f"options are: {', '.join(zero_shot_template.keys())}")
+        if self.__vision:
+            for entry in request.samples:
+                filepath = Path(self.__convert_fn(entry.input_text.removeprefix("smiles: ")))
+                content.append({
+                    "role": "user",
+                    "content": [
+                        {"type": "image", "source": {
+                            "type": "base64",
+                            "media_type": "image/png",
+                            "data": (base64.b64encode(filepath.read_bytes())).decode("utf-8")
+                        }}
+                    ]
+                })
+                content.append({"role": "assistant", "content": entry.output_text})
+            filepath = Path(self.__convert_fn(request.question.removeprefix("smiles: ")))
+            return {
+                "question": [
+                    {"type": "image", "source": {
+                        "type": "base64",
+                        "media_type": "image/png",
+                        "data": (base64.b64encode(filepath.read_bytes())).decode("utf-8")
+                    }}
+                ],
+                "name": "",
+                "request": content,
+                "engine": request.engine,
+            }
         for entry in request.samples:
             content.append(
                 {"role": "user", "content": entry.input_text}
@@ -40,10 +83,33 @@ class AnthropicCompletionProvider(AbstractRemoteExecutionCompletionProvider):
 
         return {
             "question": request.question,
+            "name": "",
             "request": content,
             "engine": request.engine,
-            "name": ""
         }
+
+
+    # def _to_request_data(self, request: CompletionRequest) -> dict:
+    #     if self.__template is None:
+    #         raise ValueError("Enable to create request: template has not specified")
+    #     try:
+    #         content = [{"role": "system", "content": zero_shot_template[self.__template]}]
+    #     except KeyError:
+    #         raise ValueError(f"Enable to create request: \"template\" configuration parameter is invalid. Valid "
+    #                          f"options are: {', '.join(zero_shot_template.keys())}")
+    #
+    #     for entry in request.samples:
+    #         content.append(
+    #             {"role": "user", "content": entry.input_text}
+    #         )
+    #         content.append({"role": "assistant", "content": entry.output_text})
+    #
+    #     return {
+    #         "question": request.question,
+    #         "request": content,
+    #         "engine": request.engine,
+    #         "name": ""
+    #     }
 
     def _estimate_cost(self, request: CompletionRequest) -> float:
         enc = tiktoken.get_encoding("cl100k_base")
@@ -82,8 +148,9 @@ class AnthropicCompletionProvider(AbstractRemoteExecutionCompletionProvider):
                 raise ValueError(f'Invalid engine "{engine}"')
 
     def _from_response_data(
-        self, request: CompletionRequest, response: dict
+            self, request: CompletionRequest, response: dict
     ) -> CompletionResponse:
+        # print(response)
         model = Message.model_validate(response)
         if not model.content:
             raise ValueError("Model returned an invalid response")
